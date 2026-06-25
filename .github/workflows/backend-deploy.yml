@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - feature/github-actions
+      - master
+    pull_requests:
+      branches:
+        - master
     paths:
       - "backend/**"
       - ".github/workflows/backend-deploy.yml"
