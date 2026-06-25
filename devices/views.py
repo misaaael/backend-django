@@ -7,9 +7,21 @@ from .services.intelbras import IntelbrasService
 @api_view(["POST"])
 def list_devices(request):
     token = request.data.get("token", "")
-    page = int(request.data.get("page", 1))
-    page_size = int(request.data.get("pageSize", 10))
     origin = request.data.get("origin", "all")
+
+    try:
+        page = int(request.data.get("page", 1))
+        page_size = int(request.data.get("pageSize", 10))
+    except (TypeError, ValueError):
+        return Response(
+            {
+                "ok": False,
+                "message": "Parâmetros de paginação inválidos.",
+                "items": [],
+                "total": 0,
+            },
+            status=400,
+        )
 
     service = IntelbrasService()
     result = service.list_devices(

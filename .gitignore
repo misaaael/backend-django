@@ -3,3 +3,9 @@ __pycache__/
 *.pyc
 db.sqlite3
 .env
+
+__pycache__/
+*.py[cod]
+db.sqlite3
+.env
+venv/
