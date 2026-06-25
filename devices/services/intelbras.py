@@ -16,8 +16,8 @@ class IntelbrasService:
 
         origin_map = {
             "all": "todos",
-            "linked": "vinculado",
-            "shared": "compartilhado",
+            "linked": "vinculados",
+            "shared": "compartilhados",
         }
 
         url = (
@@ -44,40 +44,27 @@ class IntelbrasService:
                 timeout=15,
             )
 
-            response.raise_for_status()
-
             response_data = response.json()
-
             api_status_code = response_data.get("statusCode")
-
             body = response_data.get("body", {})
 
-            # A API pode retornar body como string ou como objeto
             if isinstance(body, str):
                 body = {"msg": body}
 
-            # Token inválido/expirado
             if response.status_code in (401, 403) or api_status_code in (401, 403):
                 return {
                     "ok": False,
                     "status": 401,
-                    "message": body.get(
-                        "msg",
-                        "Token inválido ou expirado.",
-                    ),
+                    "message": body.get("msg", "Token inválido ou expirado."),
                     "items": [],
                     "total": 0,
                 }
 
-            # Outros erros retornados pela API Intelbras
             if api_status_code and api_status_code != 200:
                 return {
                     "ok": False,
-                    "status": api_status_code,
-                    "message": body.get(
-                        "msg",
-                        "Erro ao consultar a API Intelbras.",
-                    ),
+                    "status": 400,
+                    "message": body.get("msg", "Erro ao consultar a API Intelbras."),
                     "items": [],
                     "total": 0,
                 }
@@ -109,6 +96,7 @@ class IntelbrasService:
                 "total": len(devices),
                 "page": page,
                 "pageSize": page_size,
+                "hasNextPage": len(devices) == page_size,
             }
 
         except requests.exceptions.RequestException:
