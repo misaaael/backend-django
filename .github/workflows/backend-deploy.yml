@@ -56,7 +56,7 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        - name: Deploy no ECS
+       - name: Deploy no ECS
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
           ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
