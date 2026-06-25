@@ -11,6 +11,14 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+INTELBRAS_BASE_URL = os.getenv("INTELBRAS_BASE_URL")
+INTELBRAS_TOKEN = os.getenv("INTELBRAS_TOKEN")
+INTELBRAS_PRODUCTS_PATH = "/produtos"
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
