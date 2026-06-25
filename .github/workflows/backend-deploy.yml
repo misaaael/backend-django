@@ -1,4 +1,4 @@
-name: Backend CI
+name: Backend CI/CD
 
 on:
   push:
@@ -11,14 +11,17 @@ on:
 
 jobs:
   backend-ci:
-    name: Validar backend Django
+    name: Validar e publicar backend Django
     runs-on: ubuntu-latest
+
     permissions:
       id-token: write
       contents: read
+
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
+
       - name: Configurar credenciais AWS via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -56,61 +59,3 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-       - name: Deploy no ECS
-        env:
-          AWS_REGION: ${{ vars.AWS_REGION }}
-          ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
-          ECS_SERVICE: ${{ vars.ECS_SERVICE }}
-          ECS_CONTAINER_NAME: ${{ vars.ECS_CONTAINER_NAME }}
-          IMAGE_URI: ${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:${{ github.sha }}
-        run: |
-          aws ecs describe-task-definition \
-            --task-definition case-intelbras-backend \
-            --region $AWS_REGION \
-            --query taskDefinition > task-definition.json
-
-          python - <<'PY'
-          import json
-          import os
-
-          image_uri = os.environ["IMAGE_URI"]
-          container_name = os.environ["ECS_CONTAINER_NAME"]
-
-          with open("task-definition.json") as f:
-              task_def = json.load(f)
-
-          for container in task_def["containerDefinitions"]:
-              if container["name"] == container_name:
-                  container["image"] = image_uri
-
-          for key in [
-              "taskDefinitionArn",
-              "revision",
-              "status",
-              "requiresAttributes",
-              "compatibilities",
-              "registeredAt",
-              "registeredBy"
-          ]:
-              task_def.pop(key, None)
-
-          with open("new-task-definition.json", "w") as f:
-              json.dump(task_def, f)
-          PY
-
-          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition \
-            --cli-input-json file://new-task-definition.json \
-            --region $AWS_REGION \
-            --query 'taskDefinition.taskDefinitionArn' \
-            --output text)
-
-          aws ecs update-service \
-            --cluster $ECS_CLUSTER \
-            --service $ECS_SERVICE \
-            --task-definition $NEW_TASK_DEF_ARN \
-            --region $AWS_REGION
-
-          aws ecs wait services-stable \
-            --cluster $ECS_CLUSTER \
-            --services $ECS_SERVICE \
-            --region $AWS_REGION
