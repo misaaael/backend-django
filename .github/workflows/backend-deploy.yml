@@ -1,0 +1,41 @@
+name: Backend CI
+
+on:
+  push:
+    branches:
+      - feature/github-actions
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-deploy.yml"
+
+jobs:
+  backend-ci:
+    name: Validar backend Django
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Instalar dependências
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Validar projeto Django
+        working-directory: backend
+        run: python manage.py check
+
+      - name: Rodar testes
+        working-directory: backend
+        run: python manage.py test
+
+      - name: Validar build Docker
+        working-directory: backend
+        run: docker build -t intelbras-backend-ci .
