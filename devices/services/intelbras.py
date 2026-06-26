@@ -60,11 +60,20 @@ class IntelbrasService:
                     "total": 0,
                 }
 
+            if response.status_code != 200:
+                return {
+                    "ok": False,
+                    "status": 401 if response.status_code in (401, 403) else 502,
+                    "message": body.get("msg", "Token inválido ou expirado."),
+                    "items": [],
+                    "total": 0,
+                }
+
             if api_status_code and api_status_code != 200:
                 return {
                     "ok": False,
-                    "status": 400,
-                    "message": body.get("msg", "Erro ao consultar a API Intelbras."),
+                    "status": 401 if api_status_code in (401, 403) else 502,
+                    "message": body.get("msg", "Token inválido ou expirado."),
                     "items": [],
                     "total": 0,
                 }
