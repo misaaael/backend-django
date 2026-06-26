@@ -45,31 +45,11 @@ class IntelbrasService:
             )
 
             response_data = response.json()
-            print("=" * 80)
-            print("STATUS HTTP:", response.status_code)
-            print("RESPONSE JSON:", response_data)
-            print("=" * 80)
-
-            if response_data.get("status") == "erro":
-                return {
-                    "ok": False,
-                    "status": 401,
-                    "message": response_data.get(
-                        "msg",
-                        "Token inválido ou expirado.",
-                    ),
-                    "items": [],
-                    "total": 0,
-                }
-
             api_status_code = response_data.get("statusCode")
             body = response_data.get("body", {})
 
             if isinstance(body, str):
                 body = {"msg": body}
-
-            if not isinstance(body, dict):
-                body = {}
 
             if response.status_code in (401, 403) or api_status_code in (401, 403):
                 return {
@@ -91,15 +71,6 @@ class IntelbrasService:
 
             data = body.get("data", [])
 
-            if not isinstance(data, list):
-                return {
-                    "ok": False,
-                    "status": 500,
-                    "message": "Resposta inválida da API Intelbras.",
-                    "items": [],
-                    "total": 0,
-                }
-
             devices = [
                 {
                     "id": item.get("ns"),
@@ -116,7 +87,6 @@ class IntelbrasService:
                     "updateAvailable": item.get("atualizacaoDisponivel", False),
                 }
                 for item in data
-                if isinstance(item, dict)
             ]
 
             return {
