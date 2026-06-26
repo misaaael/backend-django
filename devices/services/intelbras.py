@@ -45,6 +45,10 @@ class IntelbrasService:
             )
 
             response_data = response.json()
+            print("=" * 80)
+            print("STATUS HTTP:", response.status_code)
+            print("RESPONSE JSON:", response_data)
+            print("=" * 80)
 
             if response_data.get("status") == "erro":
                 return {
