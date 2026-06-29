@@ -8,21 +8,22 @@ from .services.intelbras import IntelbrasService
 def list_devices(request):
     turnstile_token = request.data.get("turnstileToken", "")
 
-    is_valid_captcha = validate_turnstile(
-        token=turnstile_token,
-        remote_ip=request.META.get("REMOTE_ADDR"),
-    )
-
-    if not is_valid_captcha:
-        return Response(
-            {
-                "ok": False,
-                "message": "Falha na verificação de segurança. Tente novamente.",
-                "items": [],
-                "total": 0,
-            },
-            status=403,
+    if turnstile_token:
+        is_valid_captcha = validate_turnstile(
+            token=turnstile_token,
+            remote_ip=request.META.get("REMOTE_ADDR"),
         )
+
+        if not is_valid_captcha:
+            return Response(
+                {
+                    "ok": False,
+                    "message": "Falha na verificação de segurança. Tente novamente.",
+                    "items": [],
+                    "total": 0,
+                },
+                status=403,
+            )
 
     token = request.data.get("token", "")
     origin = request.data.get("origin", "all")
