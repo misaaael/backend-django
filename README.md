@@ -14,6 +14,7 @@ Backend da aplicação desenvolvido em Django e Django REST Framework.
 
 - Python
 - Django
+- Cloudflare Turnstile
 
 ---
 
@@ -62,7 +63,7 @@ Endpoint principal:
 POST /api/devices/
 ```
 
-A API atua como camada intermediária entre o frontend e a API da Intelbras.
+A API atua como camada intermediária entre o frontend e a API da Intelbras e também realiza a validação do Cloudflare Turnstile antes de consultar a API da Intelbras quando habilitado por configuração.
 
 ---
 
